@@ -1,0 +1,6 @@
+# Cross-Platform Security Lab - Python Dependencies
+# All core networking modules use Python stdlib only.
+# External dependencies are minimal and clearly justified.
+
+# PNG steganography: pixel-level image manipulation
+Pillow>=9.0.0

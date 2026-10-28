@@ -1,0 +1,31 @@
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "E501",   # Line length handled by formatter
+    "SIM105", # Use contextlib.suppress
+    "SIM112", # Allow lowercase environment variables like container
+    "B008",   # Do not perform function call in argument defaults
+    "RUF001", # Ambiguous characters in strings (allow mathematical symbols)
+    "RUF002", # Ambiguous characters in docstrings
+    "RUF003", # Ambiguous characters in comments
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["core", "defense", "lifecycle", "stego"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
