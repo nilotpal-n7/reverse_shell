@@ -24,7 +24,60 @@ A structured, hands-on cybersecurity research and learning lab covering OS inter
 
 ---
 
-## Quick Start (Arch Linux / WSL2 & Windows)
+## Using the Makefile
+
+A cross-platform [Makefile](file:///c:/Users/nilot/Documents/VSCode/reverse_shell/Makefile) is provided for convenience across Arch Linux / WSL2, macOS, and Windows:
+
+| Make Command | Action | Equivalent Python Command |
+| :--- | :--- | :--- |
+| `make setup` | Create `.venv` and install dependencies | `python -m venv .venv && pip install -r requirements.txt ruff` |
+| `make certs` | Generate TLS certificates and HMAC key | `python -m core.crypto_utils --generate-certs --generate-psk` |
+| `make probe` | Run environment & capability detection | `python -m core.platform_detect` |
+| `make controller` | Start TLS controller server | `python -m core.controller` |
+| `make client` | Start telemetry client | `python -m core.client` |
+| `make test` | Run all 23 unit tests | `python -m unittest discover -s tests -p "test_*.py" -v` |
+| `make lint` | Check linting with Ruff | `python -m ruff check .` |
+| `make format` | Auto-format codebase with Ruff | `python -m ruff format .` |
+| `make stego-demo` | Run PNG & PDF steganography demos | `python -m stego.png_stego --demo && python -m stego.pdf_stego --demo` |
+| `make defense-demo` | Run file forensics anomaly demo | `python -m defense.file_forensics --demo` |
+| `make clean` | Remove caches and test outputs | Removes `__pycache__`, `.ruff_cache`, `output_*.png` |
+
+---
+
+## Where is the `certs/` Directory? (Auto-Generated)
+
+> [!NOTE]
+> **Why `certs/` is not committed to Git:**
+> In accordance with cybersecurity and cryptographic hygiene best practices, private keys (`*.key`) and pre-shared authentication tokens (`psk.key`) must **never be checked into version control**. For this reason, `certs/` is explicitly listed in [`.gitignore`](file:///c:/Users/nilot/Documents/VSCode/reverse_shell/.gitignore).
+
+### Auto-Generation
+
+The `certs/` directory is **automatically generated on demand** when you run:
+
+```bash
+make certs
+# or
+python -m core.crypto_utils --generate-certs --generate-psk
+```
+
+When executed, `core.crypto_utils` uses your local OpenSSL CLI to create a dedicated local Public Key Infrastructure (PKI):
+
+```text
+certs/
+├── ca.key         # Root Certificate Authority private key
+├── ca.pem         # Root Certificate Authority public certificate
+├── server.key     # Controller server private key
+├── server.pem     # Controller server certificate signed by local CA
+├── client.key     # Client private key
+├── client.pem     # Client certificate signed by local CA
+└── psk.key        # Cryptographic 32-byte pre-shared HMAC secret token
+```
+
+Both `core.controller` and `core.client` automatically read their certificates and PSK from `certs/` (or from the `LAB_CERTS_DIR` variable configured in [`.env`](file:///c:/Users/nilot/Documents/VSCode/reverse_shell/.env)).
+
+---
+
+## Quick Start (Manual Commands)
 
 ### 1. Environment Setup
 
@@ -40,14 +93,13 @@ source .venv/bin/activate
 # On Windows (PowerShell):
 # .\.venv\Scripts\Activate.ps1
 
-# Install minimal dependencies (Pillow for PNG stego)
-pip install -r requirements.txt
+# Install dependencies
+pip install -r requirements.txt ruff
 ```
 
 ### 2. Generate Cryptographic Credentials
 
 ```bash
-# Generate root CA, server/client certificates, and HMAC pre-shared key
 python -m core.crypto_utils --generate-certs --generate-psk
 ```
 
@@ -122,6 +174,12 @@ python -m unittest discover -s tests -p "test_*.py" -v
 
 ```text
 reverse_shell/
+├── Makefile                     # Cross-platform build & run automation
+├── .env.example                 # Environment configuration template
+├── .gitignore                   # Excludes .venv, certs, .env, and caches
+├── pyproject.toml               # Project metadata & Ruff linter configuration
+├── requirements.txt             # Minimal dependencies (Pillow)
+├── certs/                       # TLS certificates & PSK (auto-generated, gitignored)
 ├── core/                        # Controller & client networking
 │   ├── platform_detect.py       # OS, architecture, and runtime capability probing
 │   ├── protocol.py              # JSON message schema, validation, length prefixing
@@ -147,7 +205,6 @@ reverse_shell/
 │   ├── wsl2_networking.md       # WSL2 NAT vs mirrored networking, port forwarding
 │   ├── dependency_strategies.md # Python vs Native C vs PowerShell comparative analysis
 │   └── test_plan.md             # End-to-end verification and testing procedures
-├── certs/                       # Generated TLS certificates (gitignored)
 └── tests/                       # Automated unit and integration tests
     ├── test_platform_detect.py  # Tests for environment and capability probing
     ├── test_protocol.py         # Tests for message schemas and socket framing
